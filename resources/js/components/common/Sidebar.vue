@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useConfirmModal } from '../../composables/useConfirmModal';
 import type { User } from '../../types';
 import schoolLogo from '../assets/1000054749.png';
@@ -127,6 +127,55 @@ function isActive(item: NavItem) {
     }
     return currentUrl.value.startsWith(item.activePrefix);
 }
+
+const STORAGE_KEY = 'siakad_sidebar_groups';
+
+const openGroups = ref({
+    menuUtama: true,
+    masterData: true,
+    administrasi: true,
+});
+
+try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed === 'object' && parsed !== null) {
+            openGroups.value.menuUtama = parsed.menuUtama ?? true;
+            openGroups.value.masterData = parsed.masterData ?? true;
+            openGroups.value.administrasi = parsed.administrasi ?? true;
+        }
+    }
+} catch {
+    // ignore
+}
+
+const hasActiveMenu = computed(() => navItems.some((item) => isActive(item)));
+const hasActiveMaster = computed(() =>
+    masterItems.some((item) => isActive(item)),
+);
+const hasActiveAdmin = computed(() =>
+    adminItems.some((item) => isActive(item)),
+);
+
+watch(
+    currentUrl,
+    () => {
+        if (hasActiveMenu.value) openGroups.value.menuUtama = true;
+        if (hasActiveMaster.value) openGroups.value.masterData = true;
+        if (hasActiveAdmin.value) openGroups.value.administrasi = true;
+    },
+    { immediate: true },
+);
+
+function toggleGroup(group: 'menuUtama' | 'masterData' | 'administrasi') {
+    openGroups.value[group] = !openGroups.value[group];
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(openGroups.value));
+    } catch {
+        // ignore
+    }
+}
 </script>
 
 <template>
@@ -169,95 +218,173 @@ function isActive(item: NavItem) {
         >
             <!-- Menu Utama -->
             <div class="space-y-1">
-                <p
-                    class="text-2xs mb-2 px-2.5 font-semibold tracking-wider text-primary-300/80 uppercase"
+                <button
+                    type="button"
+                    class="group text-2xs flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 font-semibold tracking-wider text-primary-300/80 uppercase transition-colors hover:bg-primary-800/40 hover:text-white"
+                    @click="toggleGroup('menuUtama')"
                 >
-                    Menu Utama
-                </p>
-
-                <Link
-                    v-for="item in navItems"
-                    :key="item.href"
-                    :href="item.href"
-                    class="group flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
-                    :class="[
-                        isActive(item)
-                            ? 'bg-primary-800 font-semibold text-white shadow-xs'
-                            : 'text-primary-100/80 hover:bg-primary-800/60 hover:text-white',
-                    ]"
-                >
-                    <span
-                        class="h-2 w-2 rounded-full transition-colors"
+                    <span class="flex items-center gap-1.5">
+                        <span>Menu Utama</span>
+                        <span
+                            v-if="!openGroups.menuUtama && hasActiveMenu"
+                            class="h-1.5 w-1.5 rounded-full bg-secondary-400"
+                        />
+                    </span>
+                    <svg
+                        class="h-3.5 w-3.5 text-primary-400 transition-transform duration-200 group-hover:text-white"
                         :class="
-                            isActive(item)
-                                ? 'bg-secondary-400'
-                                : 'bg-transparent group-hover:bg-primary-400/50'
+                            openGroups.menuUtama ? 'rotate-0' : '-rotate-90'
                         "
-                    />
-                    <span>{{ item.label }}</span>
-                </Link>
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 9l-7 7-7-7"
+                        />
+                    </svg>
+                </button>
+
+                <div v-show="openGroups.menuUtama" class="space-y-1 pt-0.5">
+                    <Link
+                        v-for="item in navItems"
+                        :key="item.href"
+                        :href="item.href"
+                        class="group flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+                        :class="[
+                            isActive(item)
+                                ? 'bg-primary-800 font-semibold text-white shadow-xs'
+                                : 'text-primary-100/80 hover:bg-primary-800/60 hover:text-white',
+                        ]"
+                    >
+                        <span
+                            class="h-2 w-2 rounded-full transition-colors"
+                            :class="
+                                isActive(item)
+                                    ? 'bg-secondary-400'
+                                    : 'bg-transparent group-hover:bg-primary-400/50'
+                            "
+                        />
+                        <span>{{ item.label }}</span>
+                    </Link>
+                </div>
             </div>
 
             <!-- Master Data Referensi -->
             <div class="space-y-1">
-                <p
-                    class="text-2xs mb-2 px-2.5 font-semibold tracking-wider text-primary-300/80 uppercase"
+                <button
+                    type="button"
+                    class="group text-2xs flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 font-semibold tracking-wider text-primary-300/80 uppercase transition-colors hover:bg-primary-800/40 hover:text-white"
+                    @click="toggleGroup('masterData')"
                 >
-                    Master Data
-                </p>
-
-                <Link
-                    v-for="item in masterItems"
-                    :key="item.href"
-                    :href="item.href"
-                    class="group flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
-                    :class="[
-                        isActive(item)
-                            ? 'bg-primary-800 font-semibold text-white shadow-xs'
-                            : 'text-primary-100/80 hover:bg-primary-800/60 hover:text-white',
-                    ]"
-                >
-                    <span
-                        class="h-2 w-2 rounded-full transition-colors"
+                    <span class="flex items-center gap-1.5">
+                        <span>Master Data</span>
+                        <span
+                            v-if="!openGroups.masterData && hasActiveMaster"
+                            class="h-1.5 w-1.5 rounded-full bg-secondary-400"
+                        />
+                    </span>
+                    <svg
+                        class="h-3.5 w-3.5 text-primary-400 transition-transform duration-200 group-hover:text-white"
                         :class="
-                            isActive(item)
-                                ? 'bg-secondary-400'
-                                : 'bg-transparent group-hover:bg-primary-400/50'
+                            openGroups.masterData ? 'rotate-0' : '-rotate-90'
                         "
-                    />
-                    <span>{{ item.label }}</span>
-                </Link>
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 9l-7 7-7-7"
+                        />
+                    </svg>
+                </button>
+
+                <div v-show="openGroups.masterData" class="space-y-1 pt-0.5">
+                    <Link
+                        v-for="item in masterItems"
+                        :key="item.href"
+                        :href="item.href"
+                        class="group flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+                        :class="[
+                            isActive(item)
+                                ? 'bg-primary-800 font-semibold text-white shadow-xs'
+                                : 'text-primary-100/80 hover:bg-primary-800/60 hover:text-white',
+                        ]"
+                    >
+                        <span
+                            class="h-2 w-2 rounded-full transition-colors"
+                            :class="
+                                isActive(item)
+                                    ? 'bg-secondary-400'
+                                    : 'bg-transparent group-hover:bg-primary-400/50'
+                            "
+                        />
+                        <span>{{ item.label }}</span>
+                    </Link>
+                </div>
             </div>
 
             <!-- Administrasi Sistem (Khusus Superadmin) -->
             <div v-if="isSuperadmin" class="space-y-1">
-                <p
-                    class="text-2xs mb-2 px-2.5 font-semibold tracking-wider text-primary-300/80 uppercase"
+                <button
+                    type="button"
+                    class="group text-2xs flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 font-semibold tracking-wider text-primary-300/80 uppercase transition-colors hover:bg-primary-800/40 hover:text-white"
+                    @click="toggleGroup('administrasi')"
                 >
-                    Administrasi Sistem
-                </p>
-
-                <Link
-                    v-for="item in adminItems"
-                    :key="item.href"
-                    :href="item.href"
-                    class="group flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
-                    :class="[
-                        isActive(item)
-                            ? 'bg-primary-800 font-semibold text-white shadow-xs'
-                            : 'text-primary-100/80 hover:bg-primary-800/60 hover:text-white',
-                    ]"
-                >
-                    <span
-                        class="h-2 w-2 rounded-full transition-colors"
+                    <span class="flex items-center gap-1.5">
+                        <span>Administrasi Sistem</span>
+                        <span
+                            v-if="!openGroups.administrasi && hasActiveAdmin"
+                            class="h-1.5 w-1.5 rounded-full bg-secondary-400"
+                        />
+                    </span>
+                    <svg
+                        class="h-3.5 w-3.5 text-primary-400 transition-transform duration-200 group-hover:text-white"
                         :class="
-                            isActive(item)
-                                ? 'bg-secondary-400'
-                                : 'bg-transparent group-hover:bg-primary-400/50'
+                            openGroups.administrasi ? 'rotate-0' : '-rotate-90'
                         "
-                    />
-                    <span>{{ item.label }}</span>
-                </Link>
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 9l-7 7-7-7"
+                        />
+                    </svg>
+                </button>
+
+                <div v-show="openGroups.administrasi" class="space-y-1 pt-0.5">
+                    <Link
+                        v-for="item in adminItems"
+                        :key="item.href"
+                        :href="item.href"
+                        class="group flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+                        :class="[
+                            isActive(item)
+                                ? 'bg-primary-800 font-semibold text-white shadow-xs'
+                                : 'text-primary-100/80 hover:bg-primary-800/60 hover:text-white',
+                        ]"
+                    >
+                        <span
+                            class="h-2 w-2 rounded-full transition-colors"
+                            :class="
+                                isActive(item)
+                                    ? 'bg-secondary-400'
+                                    : 'bg-transparent group-hover:bg-primary-400/50'
+                            "
+                        />
+                        <span>{{ item.label }}</span>
+                    </Link>
+                </div>
             </div>
         </div>
 
