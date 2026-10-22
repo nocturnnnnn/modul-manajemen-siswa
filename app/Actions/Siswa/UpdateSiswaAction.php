@@ -13,6 +13,8 @@ class UpdateSiswaAction
 {
     /**
      * Execute student update with relations synchronization in a single ACID transaction.
+     *
+     * @param  array<string, mixed>  $data
      */
     public function execute(Siswa $siswa, array $data, ?UploadedFile $foto = null): Siswa
     {

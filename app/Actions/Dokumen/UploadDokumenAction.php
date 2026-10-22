@@ -10,7 +10,7 @@ class UploadDokumenAction
     /**
      * Handle document upload and persistence.
      *
-     * @param  array{kd_siswa: int, kd_jenis: int, nomor_dokumen?: string|null}  $data
+     * @param  array<string, mixed>  $data
      */
     public function execute(array $data, UploadedFile $file): DokumenSiswa
     {

@@ -20,7 +20,7 @@ class KelulusanController extends Controller
      */
     public function index(Request $request): Response
     {
-        $search = $request->query('search');
+        $search = $request->string('search')->toString();
         $kdTahun = $request->query('kd_tahun');
 
         $tahunAjaranList = TahunAjaran::orderByDesc('kd_tahun')->get();
@@ -37,7 +37,7 @@ class KelulusanController extends Controller
             ->get();
 
         $kelulusanList = Kelulusan::with(['siswa', 'tahunAjaran', 'alumni'])
-            ->when($search, function ($q, $search) {
+            ->when($search !== '', function ($q) use ($search) {
                 $q->where('no_ijazah', 'like', "%{$search}%")
                     ->orWhereHas('siswa', fn ($sq) => $sq->where('nm_siswa', 'like', "%{$search}%")->orWhere('nis', 'like', "%{$search}%"));
             })
@@ -59,7 +59,7 @@ class KelulusanController extends Controller
             'tahunAktif' => $tahunAktif,
             'stats' => $stats,
             'filters' => [
-                'search' => $search ?? '',
+                'search' => $search,
                 'kd_tahun' => $kdTahun ? (int) $kdTahun : null,
             ],
         ]);

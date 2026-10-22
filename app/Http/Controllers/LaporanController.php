@@ -60,6 +60,7 @@ class LaporanController extends Controller
     /**
      * Fetch report rows based on report type and applied filter parameters.
      *
+     * @param  array<string, mixed>  $filters
      * @return array<string, mixed>
      */
     private function queryReportData(string $reportType, array $filters): array
@@ -73,13 +74,13 @@ class LaporanController extends Controller
                     ->when($kdKelas, fn ($q) => $q->where('kd_kelas_tujuan', $kdKelas))
                     ->when($kdTahun, fn ($q) => $q->where('kd_tahun', $kdTahun));
 
-                $items = $query->get()->map(function ($k) {
+                $items = $query->get()->map(function (KenaikanKelas $k) {
                     return [
                         'nis' => $k->siswa?->nis,
                         'nisn' => $k->siswa?->nisn,
                         'nm_siswa' => $k->siswa?->nm_siswa,
                         'jenis_kelamin' => $k->siswa?->jenis_kelamin,
-                        'agama' => $k->siswa?->agama?->nm_agama,
+                        'agama' => $k->siswa?->agama->nm_agama ?? '-',
                         'kelas_asal' => $k->kelasAsal?->nm_kelas,
                         'kelas_tujuan' => $k->kelasTujuan?->nm_kelas,
                         'status' => $k->status === 'naik' ? 'Naik Kelas' : 'Tinggal Kelas',
@@ -99,9 +100,9 @@ class LaporanController extends Controller
                 $mutasiRows = collect();
                 if (! $jenis || $jenis !== 'pindah') {
                     $mQuery = Mutasi::with('siswa')
-                        ->when($jenis && $jenis !== 'pindah', fn ($q) => $q->where('jenis_mutasi', $jenis));
+                        ->when($jenis, fn ($q) => $q->where('jenis_mutasi', $jenis));
 
-                    $mutasiRows = $mQuery->get()->map(function ($m) {
+                    $mutasiRows = $mQuery->get()->map(function (Mutasi $m) {
                         return [
                             'tanggal' => $m->tgl_mutasi,
                             'nis' => $m->siswa?->nis,
@@ -114,7 +115,7 @@ class LaporanController extends Controller
 
                 $pindahRows = collect();
                 if (! $jenis || $jenis === 'pindah') {
-                    $pindahRows = PindahSekolah::with('siswa')->get()->map(function ($p) {
+                    $pindahRows = PindahSekolah::with('siswa')->get()->map(function (PindahSekolah $p) {
                         return [
                             'tanggal' => $p->tgl_pindah,
                             'nis' => $p->siswa?->nis,
@@ -143,16 +144,16 @@ class LaporanController extends Controller
                         $q->whereHas('alumni', fn ($aq) => $aq->where('kegiatan_lanjutan', $kegiatan));
                     });
 
-                $items = $query->get()->map(function ($k) {
+                $items = $query->get()->map(function (Kelulusan $k) {
                     return [
                         'nis' => $k->siswa?->nis,
                         'nm_siswa' => $k->siswa?->nm_siswa,
                         'tahun_lulus' => $k->tahunAjaran?->nm_tahun,
                         'tgl_lulus' => $k->tgl_lulus,
                         'no_ijazah' => $k->no_ijazah ?? 'Belum Dicatat',
-                        'kegiatan_lanjutan' => $k->alumni?->kegiatan_lanjutan ?? 'Belum Terdata',
-                        'instansi' => $k->alumni?->instansi ?? '-',
-                        'kontak' => $k->alumni?->kontak ?? '-',
+                        'kegiatan_lanjutan' => $k->alumni->kegiatan_lanjutan ?? 'Belum Terdata',
+                        'instansi' => $k->alumni->instansi ?? '-',
+                        'kontak' => $k->alumni->kontak ?? '-',
                     ];
                 });
 
@@ -174,18 +175,18 @@ class LaporanController extends Controller
                     ->when($gender, fn ($q) => $q->where('jenis_kelamin', $gender))
                     ->orderBy('nm_siswa');
 
-                $items = $query->get()->map(function ($s) {
-                    $pendaftar = $s->pendaftaran?->first();
+                $items = $query->get()->map(function (Siswa $s) {
+                    $pendaftar = $s->pendaftaran->first();
 
                     return [
                         'nis' => $s->nis,
                         'nisn' => $s->nisn,
                         'nm_siswa' => $s->nm_siswa,
                         'jenis_kelamin' => $s->jenis_kelamin,
-                        'agama' => $s->agama?->nm_agama ?? '-',
+                        'agama' => $s->agama->nm_agama ?? '-',
                         'alamat' => $s->alamat,
-                        'jalur' => $pendaftar?->jalur ?? '-',
-                        'asal_sekolah' => $pendaftar?->asal_sekolah ?? '-',
+                        'jalur' => $pendaftar->jalur ?? '-',
+                        'asal_sekolah' => $pendaftar->asal_sekolah ?? '-',
                         'status' => ucfirst($s->status_siswa),
                     ];
                 });

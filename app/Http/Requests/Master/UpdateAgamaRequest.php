@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Master;
 
+use App\Models\Agama;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateAgamaRequest extends FormRequest
@@ -11,10 +13,13 @@ class UpdateAgamaRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         $agama = $this->route('agama');
-        $kdAgama = is_object($agama) ? $agama->kd_agama : $agama;
+        $kdAgama = $agama instanceof Agama ? (string) $agama->kd_agama : (is_scalar($agama) ? (string) $agama : '0');
 
         return [
             'nm_agama' => ['required', 'string', 'max:30', 'unique:agama,nm_agama,'.$kdAgama.',kd_agama'],

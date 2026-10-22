@@ -22,12 +22,12 @@ class DokumenSiswaController extends Controller
      */
     public function index(Request $request): Response
     {
-        $search = $request->query('search');
-        $status = $request->query('status');
+        $search = $request->string('search')->toString();
+        $status = $request->string('status')->toString();
         $kdJenis = $request->query('jenis');
 
         $query = DokumenSiswa::with(['siswa', 'jenis'])
-            ->when($search, function ($q, $search) {
+            ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($sub) use ($search) {
                     $sub->where('nomor_dokumen', 'like', "%{$search}%")
                         ->orWhereHas('siswa', function ($sq) use ($search) {
@@ -37,7 +37,7 @@ class DokumenSiswaController extends Controller
                         });
                 });
             })
-            ->when($status && in_array($status, ['belum', 'terverifikasi', 'ditolak']), function ($q) use ($status) {
+            ->when(in_array($status, ['belum', 'terverifikasi', 'ditolak'], true), function ($q) use ($status) {
                 $q->where('status_verifikasi', $status);
             })
             ->when($kdJenis, function ($q, $kdJenis) {
@@ -61,8 +61,8 @@ class DokumenSiswaController extends Controller
                 ->get(),
             'stats' => $stats,
             'filters' => [
-                'search' => $search ?? '',
-                'status' => $status ?? '',
+                'search' => $search,
+                'status' => $status,
                 'jenis' => $kdJenis ?? '',
             ],
         ]);

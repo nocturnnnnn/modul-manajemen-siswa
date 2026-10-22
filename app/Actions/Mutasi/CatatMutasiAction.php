@@ -11,7 +11,7 @@ class CatatMutasiAction
     /**
      * Record a student mutation (Incoming, Outgoing, or Internal) and update status.
      *
-     * @param  array{kd_siswa: int, jenis_mutasi: string, tgl_mutasi: string, no_surat: string}  $data
+     * @param  array<string, mixed>  $data
      */
     public function execute(array $data): Mutasi
     {
@@ -23,7 +23,7 @@ class CatatMutasiAction
                 'no_surat' => $data['no_surat'],
             ]);
 
-            $siswa = Siswa::findOrFail($data['kd_siswa']);
+            $siswa = Siswa::where('kd_siswa', (int) $data['kd_siswa'])->firstOrFail();
 
             if ($data['jenis_mutasi'] === 'Keluar') {
                 $siswa->update(['status_siswa' => 'mutasi']);

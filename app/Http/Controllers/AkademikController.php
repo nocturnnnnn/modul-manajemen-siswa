@@ -26,7 +26,7 @@ class AkademikController extends Controller
             ?: TahunAjaran::latest('kd_tahun')->first();
 
         $kdTahun = $request->query('kd_tahun', $tahunAjaranAktif?->kd_tahun);
-        $selectedTahun = $kdTahun ? TahunAjaran::find($kdTahun) : $tahunAjaranAktif;
+        $selectedTahun = $kdTahun ? TahunAjaran::where('kd_tahun', $kdTahun)->first() : $tahunAjaranAktif;
 
         $kelasList = Kelas::orderBy('tingkat')->orderBy('nm_kelas')->get();
 

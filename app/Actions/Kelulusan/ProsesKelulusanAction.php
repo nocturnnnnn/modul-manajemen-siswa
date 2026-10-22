@@ -12,11 +12,11 @@ class ProsesKelulusanAction
     /**
      * Process grade 9 student graduation, assign no ijazah, and set status to 'lulus'.
      *
-     * @param  array{kd_siswa: int, kd_tahun: int, tgl_lulus: string, no_ijazah?: string|null}  $data
+     * @param  array<string, mixed>  $data
      */
     public function execute(array $data): Kelulusan
     {
-        $siswa = Siswa::with('kelulusan')->findOrFail($data['kd_siswa']);
+        $siswa = Siswa::with('kelulusan')->where('kd_siswa', (int) $data['kd_siswa'])->firstOrFail();
 
         $latestKenaikan = $siswa->kenaikanKelas()->latest('kd_kenaikan')->first();
         $isGrade9 = $latestKenaikan && $latestKenaikan->kelasTujuan && $latestKenaikan->kelasTujuan->tingkat === 9;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Master;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreJenisDokumenRequest extends FormRequest
@@ -11,6 +12,9 @@ class StoreJenisDokumenRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [

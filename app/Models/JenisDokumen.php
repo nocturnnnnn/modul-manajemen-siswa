@@ -2,14 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $kd_jenis
+ * @property string $kode
+ * @property string $nm_jenis
+ * @property bool $wajib
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, DokumenSiswa> $dokumenSiswa
+ */
 class JenisDokumen extends Model
 {
-    use HasFactory;
-
     protected $table = 'jenis_dokumen';
 
     protected $primaryKey = 'kd_jenis';
@@ -26,6 +34,8 @@ class JenisDokumen extends Model
 
     /**
      * Relasi ke dokumen siswa yang termasuk jenis ini.
+     *
+     * @return HasMany<DokumenSiswa, $this>
      */
     public function dokumenSiswa(): HasMany
     {

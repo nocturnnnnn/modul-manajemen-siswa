@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Master;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreAgamaRequest extends FormRequest
@@ -11,6 +12,9 @@ class StoreAgamaRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [

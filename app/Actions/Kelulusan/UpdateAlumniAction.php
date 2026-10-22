@@ -11,7 +11,7 @@ class UpdateAlumniAction
     /**
      * Record or update alumni directory details and set status to 'alumni'.
      *
-     * @param  array{kd_lulus: int, kegiatan_lanjutan: string, instansi: string, kontak?: string|null}  $data
+     * @param  array<string, mixed>  $data
      */
     public function execute(array $data): Alumni
     {
@@ -25,7 +25,7 @@ class UpdateAlumniAction
                 ]
             );
 
-            $kelulusan = Kelulusan::with('siswa')->findOrFail($data['kd_lulus']);
+            $kelulusan = Kelulusan::with('siswa')->where('kd_lulus', (int) $data['kd_lulus'])->firstOrFail();
             if ($kelulusan->siswa) {
                 $kelulusan->siswa->update(['status_siswa' => 'alumni']);
             }
