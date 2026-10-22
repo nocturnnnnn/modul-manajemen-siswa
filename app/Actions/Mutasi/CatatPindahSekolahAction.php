@@ -11,7 +11,7 @@ class CatatPindahSekolahAction
     /**
      * Record a student school transfer and update student status to 'pindah'.
      *
-     * @param  array{kd_siswa: int, sekolah_tujuan: string, tgl_pindah: string, alasan: string}  $data
+     * @param  array<string, mixed>  $data
      */
     public function execute(array $data): PindahSekolah
     {
@@ -23,7 +23,7 @@ class CatatPindahSekolahAction
                 'alasan' => $data['alasan'],
             ]);
 
-            $siswa = Siswa::findOrFail($data['kd_siswa']);
+            $siswa = Siswa::where('kd_siswa', (int) $data['kd_siswa'])->firstOrFail();
             $siswa->update(['status_siswa' => 'pindah']);
 
             return $pindah;

@@ -14,6 +14,8 @@ class CreateSiswaAction
 {
     /**
      * Execute student creation with full family, parent, contact, and registration ACID transaction.
+     *
+     * @param  array<string, mixed>  $data
      */
     public function execute(array $data, ?UploadedFile $foto = null): Siswa
     {

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Siswa;
 
+use App\Models\Siswa;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateSiswaRequest extends FormRequest
@@ -11,10 +13,13 @@ class UpdateSiswaRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         $siswa = $this->route('siswa');
-        $kdSiswa = is_object($siswa) ? $siswa->kd_siswa : $siswa;
+        $kdSiswa = $siswa instanceof Siswa ? (string) $siswa->kd_siswa : (is_scalar($siswa) ? (string) $siswa : '0');
 
         return [
             // Identitas Pokok Siswa

@@ -18,11 +18,11 @@ class AlumniController extends Controller
      */
     public function index(Request $request): Response
     {
-        $search = $request->query('search');
-        $kegiatan = $request->query('kegiatan');
+        $search = $request->string('search')->toString();
+        $kegiatan = $request->string('kegiatan')->toString();
 
         $alumniList = Alumni::with(['kelulusan.siswa', 'kelulusan.tahunAjaran'])
-            ->when($search, function ($q, $search) {
+            ->when($search !== '', function ($q) use ($search) {
                 $q->where('instansi', 'like', "%{$search}%")
                     ->orWhere('kegiatan_lanjutan', 'like', "%{$search}%")
                     ->orWhereHas('kelulusan.siswa', function ($sq) use ($search) {
@@ -30,7 +30,7 @@ class AlumniController extends Controller
                             ->orWhere('nis', 'like', "%{$search}%");
                     });
             })
-            ->when($kegiatan, fn ($q, $kegiatan) => $q->where('kegiatan_lanjutan', $kegiatan))
+            ->when($kegiatan !== '', fn ($q) => $q->where('kegiatan_lanjutan', $kegiatan))
             ->latest('kd_alumni')
             ->paginate(10)
             ->withQueryString();
@@ -52,8 +52,8 @@ class AlumniController extends Controller
             'lulusanBelumAlumni' => $lulusanBelumAlumni,
             'stats' => $stats,
             'filters' => [
-                'search' => $search ?? '',
-                'kegiatan' => $kegiatan ?? '',
+                'search' => $search,
+                'kegiatan' => $kegiatan,
             ],
         ]);
     }

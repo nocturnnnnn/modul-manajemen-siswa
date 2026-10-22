@@ -21,11 +21,11 @@ class MutasiController extends Controller
      */
     public function index(Request $request): Response
     {
-        $search = $request->query('search');
+        $search = $request->string('search')->toString();
         $tab = $request->query('tab', 'mutasi');
 
         $mutasiList = Mutasi::with('siswa')
-            ->when($search, function ($q, $search) {
+            ->when($search !== '', function ($q) use ($search) {
                 $q->where('no_surat', 'like', "%{$search}%")
                     ->orWhereHas('siswa', function ($sq) use ($search) {
                         $sq->where('nm_siswa', 'like', "%{$search}%")
@@ -37,7 +37,7 @@ class MutasiController extends Controller
             ->withQueryString();
 
         $pindahList = PindahSekolah::with('siswa')
-            ->when($search, function ($q, $search) {
+            ->when($search !== '', function ($q) use ($search) {
                 $q->where('sekolah_tujuan', 'like', "%{$search}%")
                     ->orWhere('alasan', 'like', "%{$search}%")
                     ->orWhereHas('siswa', function ($sq) use ($search) {
@@ -65,7 +65,7 @@ class MutasiController extends Controller
                 ->get(),
             'stats' => $stats,
             'filters' => [
-                'search' => $search ?? '',
+                'search' => $search,
                 'tab' => $tab,
             ],
         ]);

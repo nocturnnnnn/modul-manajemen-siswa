@@ -60,7 +60,7 @@ class KenaikanKelasRequest extends FormRequest
      */
     public function withValidator(Validator $validator): void
     {
-        $validator->after(function ($validator) {
+        $validator->after(function (Validator $validator) {
             $kdKelasAsal = $this->input('kd_kelas_asal');
             $evaluasi = $this->input('evaluasi', []);
 
@@ -68,7 +68,7 @@ class KenaikanKelasRequest extends FormRequest
                 return;
             }
 
-            $kelasAsal = Kelas::find($kdKelasAsal);
+            $kelasAsal = Kelas::where('kd_kelas', $kdKelasAsal)->first();
             if (! $kelasAsal) {
                 return;
             }
@@ -81,7 +81,7 @@ class KenaikanKelasRequest extends FormRequest
                 $kdKelasTujuan = $item['kd_kelas_tujuan'] ?? null;
                 $kelasTujuan = $kelasMap->get($kdKelasTujuan);
 
-                if (! $kelasTujuan) {
+                if (! $kelasTujuan instanceof Kelas) {
                     continue;
                 }
 

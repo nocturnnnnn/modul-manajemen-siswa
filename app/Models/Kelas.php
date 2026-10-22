@@ -2,14 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $kd_kelas
+ * @property string $nm_kelas
+ * @property int $tingkat
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, KenaikanKelas> $kenaikanKelasAsal
+ * @property-read Collection<int, KenaikanKelas> $kenaikanKelasTujuan
+ */
 class Kelas extends Model
 {
-    use HasFactory;
-
     protected $table = 'kelas';
 
     protected $primaryKey = 'kd_kelas';
@@ -25,6 +33,8 @@ class Kelas extends Model
 
     /**
      * Relasi ke riwayat kenaikan kelas sebagai kelas asal.
+     *
+     * @return HasMany<KenaikanKelas, $this>
      */
     public function kenaikanKelasAsal(): HasMany
     {
@@ -33,6 +43,8 @@ class Kelas extends Model
 
     /**
      * Relasi ke riwayat kenaikan kelas sebagai kelas tujuan.
+     *
+     * @return HasMany<KenaikanKelas, $this>
      */
     public function kenaikanKelasTujuan(): HasMany
     {

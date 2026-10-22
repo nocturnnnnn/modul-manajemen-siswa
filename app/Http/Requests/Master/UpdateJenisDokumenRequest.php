@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Master;
 
+use App\Models\JenisDokumen;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateJenisDokumenRequest extends FormRequest
@@ -11,10 +13,13 @@ class UpdateJenisDokumenRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         $jenisDokumen = $this->route('jenis_dokumen') ?? $this->route('jenisDokumen');
-        $kdJenis = is_object($jenisDokumen) ? $jenisDokumen->kd_jenis : $jenisDokumen;
+        $kdJenis = $jenisDokumen instanceof JenisDokumen ? (string) $jenisDokumen->kd_jenis : (is_scalar($jenisDokumen) ? (string) $jenisDokumen : '0');
 
         return [
             'kode' => ['required', 'string', 'max:10', 'unique:jenis_dokumen,kode,'.$kdJenis.',kd_jenis'],

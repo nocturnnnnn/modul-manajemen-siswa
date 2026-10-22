@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Master;
 
+use App\Models\Kelas;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateKelasRequest extends FormRequest
@@ -11,10 +13,13 @@ class UpdateKelasRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         $kelas = $this->route('kelas');
-        $kdKelas = is_object($kelas) ? $kelas->kd_kelas : $kelas;
+        $kdKelas = $kelas instanceof Kelas ? (string) $kelas->kd_kelas : (is_scalar($kelas) ? (string) $kelas : '0');
 
         return [
             'nm_kelas' => ['required', 'string', 'max:10', 'unique:kelas,nm_kelas,'.$kdKelas.',kd_kelas'],

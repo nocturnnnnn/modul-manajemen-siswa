@@ -69,13 +69,13 @@ class ProsesKelulusanRequest extends FormRequest
      */
     public function withValidator(Validator $validator): void
     {
-        $validator->after(function ($validator) {
+        $validator->after(function (Validator $validator) {
             $kdSiswa = $this->input('kd_siswa');
             if (! $kdSiswa) {
                 return;
             }
 
-            $siswa = Siswa::with('kelulusan')->find($kdSiswa);
+            $siswa = Siswa::with('kelulusan')->where('kd_siswa', $kdSiswa)->first();
             if (! $siswa) {
                 return;
             }
